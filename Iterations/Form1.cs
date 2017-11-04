@@ -12,8 +12,8 @@ namespace SLAU
             InitializeComponent();
             SolveButton.Enabled = true;
         }
-        public int n=2; //Размерности
-        public double[,] A, A1; //Исходная, единичная
+        public const int  n=5; //Размерности
+        public double[,] A = new double[n * 2+1 , n + 1]; //Исходная, единичная
         public double[] b = new double[2];  //Вектор b
         public double[] solution; //Для решения
         public int[] kol;
@@ -303,6 +303,53 @@ namespace SLAU
             temp[1] = 0.8 - Math.Cos(x_[0] - 1);
             return temp;
         }    
+        public void create_table(int type)
+        {
+            int a = 1, b = 2;
+            double h = (double)(b - a) / n;
+            for (int i = 0; i <= n; i++)
+            {
+                A[i * 2, 0] = a + i * h;
+            }
+            for (int i = 0; i < n; i++)// отвечает за столбцы
+            {
+                //проход по элементам в столбце
+                for (int j = 0; j <= n - i; j++)
+                {
+                    double elem_matr = 0;
+
+                    if (type == 13)
+                    {
+                        for (int k = 0; k <= i; k++)
+                        {
+                            double temp = 1;
+                            for (int i_mult = 0; i_mult < k; i_mult++)
+                                temp *= A[k * 2, 0] - A[i_mult * 2, 0];
+                            for (int i_mult = k + 1; i_mult <= k; i_mult++)
+                                temp *= A[k * 2, 0] - A[i_mult * 2, 0];
+                            temp = f_13(A[k * 2, 0]) / temp;
+                            elem_matr += temp;
+                        }
+                    }
+                    else
+                    {
+                        for (int k = 0; k <= i; k++)
+                        {
+                            double temp = 1;
+                            for (int i_mult = 0; j < k; i_mult++)
+                                temp *= A[k * 2, 0] - A[i_mult * 2, 0];
+                            for (int i_mult = k + 1; i_mult <= k; i_mult++)
+                                temp *= A[k * 2, 0] - A[i_mult * 2, 0];
+                            temp = f_22(A[k * 2, 0]) / temp;
+                            elem_matr += temp;
+                        }
+                    }
+                    A[i + 2 * j, i+1] = elem_matr;
+                }
+                
+            }
+            
+        }
         
         //Метод Ньютона
         public void Niuton()
@@ -324,7 +371,9 @@ namespace SLAU
         //Решение уравнения
         private void SolveButton_Click(object sender, EventArgs e)
         {
-            Niuton();            
+            //Niuton();   
+                     
+            create_table(13);
             SaveFile();
         }
 
