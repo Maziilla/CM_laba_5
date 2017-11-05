@@ -13,7 +13,7 @@ namespace SLAU
             SolveButton.Enabled = true;
         }
         public const int  n=5; //Размерности
-        public double[,] A = new double[n * 2+1 , n + 1]; //Исходная, единичная
+        public double[,] A = new double[n * 2+1 , n + 2]; //Исходная, единичная
         public double[] b = new double[2];  //Вектор b
         public double[] solution; //Для решения
         public int[] kol;
@@ -38,11 +38,11 @@ namespace SLAU
         {
             if (Mas == A)
                 strList.Add("Матрица А:");
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i <= n*2; i++)
             {
                 string str1 = "";
-                for (int j = 0; j < n; j++)
-                    str1 += String.Format("{0,-30} ", Mas[i, j]);
+                for (int j = 0; j < n+2; j++)
+                    str1 += String.Format("{0,-15} ", Mas[i, j]);
                 strList.Add(str1);
             }
             strList.Add("");
@@ -311,7 +311,7 @@ namespace SLAU
             {
                 A[i * 2, 0] = a + i * h;
             }
-            for (int i = 0; i < n; i++)// отвечает за столбцы
+            for (int i = 0; i <= n; i++)// отвечает за столбцы
             {
                 //проход по элементам в столбце
                 for (int j = 0; j <= n - i; j++)
@@ -324,10 +324,10 @@ namespace SLAU
                         {
                             double temp = 1;
                             for (int i_mult = 0; i_mult < k; i_mult++)
-                                temp *= A[k * 2, 0] - A[i_mult * 2, 0];
-                            for (int i_mult = k + 1; i_mult <= k; i_mult++)
-                                temp *= A[k * 2, 0] - A[i_mult * 2, 0];
-                            temp = f_13(A[k * 2, 0]) / temp;
+                                temp *= A[(k + j) * 2, 0] - A[(i_mult +j) * 2, 0];
+                            for (int i_mult = k + 1; i_mult <= i; i_mult++)
+                                temp *= A[(k + j) * 2, 0] - A[(i_mult + j) * 2, 0];
+                            temp = f_13(A[(k + j) * 2, 0]) / temp;
                             elem_matr += temp;
                         }
                     }
@@ -338,17 +338,18 @@ namespace SLAU
                             double temp = 1;
                             for (int i_mult = 0; j < k; i_mult++)
                                 temp *= A[k * 2, 0] - A[i_mult * 2, 0];
-                            for (int i_mult = k + 1; i_mult <= k; i_mult++)
+                            for (int i_mult = k + 1; i_mult <= i; i_mult++)
                                 temp *= A[k * 2, 0] - A[i_mult * 2, 0];
                             temp = f_22(A[k * 2, 0]) / temp;
                             elem_matr += temp;
                         }
                     }
                     A[i + 2 * j, i+1] = elem_matr;
-                }
-                
+                }                
             }
-            
+            WriteMas(A);
+
+
         }
         
         //Метод Ньютона
