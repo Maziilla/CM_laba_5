@@ -266,12 +266,12 @@ namespace SLAU
         //Для функции
         public double f_13(double x)
         {
-            return Math.Pow(3, x) - 3 * x + 2;
+            return Math.Pow(3, x) + 2 * x - 5;
         }
 
         public double f_derivative_13(double x)
         {
-            return (Math.Pow(3, x) * Math.Log(3) - 3);
+            return (Math.Pow(3, x) * Math.Log(3) + 2);
         }
 
        
@@ -311,42 +311,30 @@ namespace SLAU
             {
                 A[i * 2, 0] = a + i * h;
             }
-            for (int i = 0; i <= n; i++)// отвечает за столбцы
+            if (type == 13)
+            {
+                for (int i = 0; i <= n; i++)
+                {
+                    A[i * 2, 1] = f_13(A[i * 2, 0]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i <= n; i++)
+                {
+                    A[i * 2, 1] = f_22(A[i * 2, 0]);
+                }
+            }
+            for (int i = 2; i <= n+1; i++)// отвечает за столбцы
             {
                 //проход по элементам в столбце
-                for (int j = 0; j <= n - i; j++)
+                for (int j = i - 1; j <= 2*n - i + 1; j+=2)
                 {
-                    double elem_matr = 0;
+                    A[j, i] = (A[j + 1, i-1] - A[j - 1, i-1]) / (A[j + i - 1, 0] - A[j-i + 1, 0]);
+                }
 
-                    if (type == 13)
-                    {
-                        for (int k = 0; k <= i; k++)
-                        {
-                            double temp = 1;
-                            for (int i_mult = 0; i_mult < k; i_mult++)
-                                temp *= A[(k + j) * 2, 0] - A[(i_mult +j) * 2, 0];
-                            for (int i_mult = k + 1; i_mult <= i; i_mult++)
-                                temp *= A[(k + j) * 2, 0] - A[(i_mult + j) * 2, 0];
-                            temp = f_13(A[(k + j) * 2, 0]) / temp;
-                            elem_matr += temp;
-                        }
-                    }
-                    else
-                    {
-                        for (int k = 0; k <= i; k++)
-                        {
-                            double temp = 1;
-                            for (int i_mult = 0; j < k; i_mult++)
-                                temp *= A[k * 2, 0] - A[i_mult * 2, 0];
-                            for (int i_mult = k + 1; i_mult <= i; i_mult++)
-                                temp *= A[k * 2, 0] - A[i_mult * 2, 0];
-                            temp = f_22(A[k * 2, 0]) / temp;
-                            elem_matr += temp;
-                        }
-                    }
-                    A[i + 2 * j, i+1] = elem_matr;
-                }                
             }
+            
             WriteMas(A);
 
 
