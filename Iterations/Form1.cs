@@ -13,7 +13,7 @@ namespace SLAU
             SolveButton.Enabled = true;
         }
         public const int  n=5; //Размерности
-        public double[,] A = new double[n * 2+1 , n + 2]; //Исходная, единичная
+        public double[,] A = new double[n+1 , n + 2]; //Исходная, единичная
         public double[] b = new double[2];  //Вектор b
         public double[] solution; //Для решения
         public int[] kol;
@@ -38,7 +38,7 @@ namespace SLAU
         {
             if (Mas == A)
                 strList.Add("Матрица А:");
-            for (int i = 0; i <= n*2; i++)
+            for (int i = 0; i <= n; i++)
             {
                 string str1 = "";
                 for (int j = 0; j < n+2; j++)
@@ -307,30 +307,30 @@ namespace SLAU
         {
             int a = 1, b = 2;
             double h = (double)(b - a) / n;
-            for (int i = 0; i <= n; i++)
+            for(int i=0;i<=n;i++)
             {
-                A[i * 2, 0] = a + i * h;
-            }
+                A[i, 0] = a + i * h;
+            }          
             if (type == 13)
             {
                 for (int i = 0; i <= n; i++)
                 {
-                    A[i * 2, 1] = f_13(A[i * 2, 0]);
+                    A[i, 1] = f_13(A[i, 0]);
                 }
             }
             else
             {
                 for (int i = 0; i <= n; i++)
                 {
-                    A[i * 2, 1] = f_22(A[i * 2, 0]);
+                    A[i, 1] = f_22(A[i, 0]);
                 }
             }
-            for (int i = 2; i <= n+1; i++)// отвечает за столбцы
-            {
+            for (int i = 2; i <= n + 1; i++)//отвечает за столбцы
+            { 
                 //проход по элементам в столбце
-                for (int j = i - 1; j <= 2*n - i + 1; j+=2)
+                for (int j = 0; j <= n - i + 1; j ++)
                 {
-                    A[j, i] = (A[j + 1, i-1] - A[j - 1, i-1]) / (A[j + i - 1, 0] - A[j-i + 1, 0]);
+                    A[j, i] = (A[j + 1, i - 1] - A[j, i - 1]) / (A[j+i - 1, 0] - A[j , 0]);
                 }
 
             }
