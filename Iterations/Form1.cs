@@ -47,7 +47,19 @@ namespace SLAU
             }
             strList.Add("");
         }
-
+        public void WriteMas_(double[,] Mas)
+        {
+            if (Mas == A)
+                strList.Add("Матрица А:");
+            for (int i = 0; i < n; i++)
+            {
+                string str1 = "";
+                for (int j = 0; j < n ; j++)
+                    str1 += String.Format("{0,-15} ", Mas[i, j]);
+                strList.Add(str1);
+            }
+            strList.Add("");
+        }
         //Сохраняем решение в файл
         public void SaveFile()
         {
@@ -273,8 +285,11 @@ namespace SLAU
         {
             return (Math.Pow(3, x) * Math.Log(3) + 2);
         }
+        public double f_derivative_13_6(double x)
+        {
+            return (Math.Pow(3, x) * Math.Pow(Math.Log(3),6));
+        }
 
-       
         public double f_22(double x)
         {            
             return Math.Atan(x) + 2 * x - 1;
@@ -285,7 +300,10 @@ namespace SLAU
             return (1 / (x * x + 1) + 2);
         }
 
-       
+        public double f_derivative_22_6(double x)
+        {
+            return (240 * x * (3 * x * x * x * x - 10 * x * x + 3) / Math.Pow((x * x + 1), 6));
+        }
         public double[] f_13_reverse(double[] x_)
         {
             var temp = new double[n];
@@ -303,14 +321,20 @@ namespace SLAU
             temp[1] = 0.8 - Math.Cos(x_[0] - 1);
             return temp;
         }    
+        public long Factorial(int n)
+        {
+            long temp = 1;
+            for (int i = 1; i <= n; i++)
+                temp *= i;
+            return temp;
+        }
         public void create_table(int type)
         {
             int a = 1, b = 2;
             double h = (double)(b - a) / n;
-            for(int i=0;i<=n;i++)
-            {
+            for (int i = 0; i <= n; i++)
                 A[i, 0] = a + i * h;
-            }          
+                      
             if (type == 13)
             {
                 for (int i = 0; i <= n; i++)
@@ -332,28 +356,102 @@ namespace SLAU
                 {
                     A[j, i] = (A[j + 1, i - 1] - A[j, i - 1]) / (A[j+i - 1, 0] - A[j , 0]);
                 }
-
-            }
-            
+            }            
             WriteMas(A);
-
-
         }
         
         //Метод Ньютона
         public void Niuton()
-        {          
-           
-            strList.Add("");
-            strList.Add("Метод Ньютона:");           
+        {
+            int a = 1, b = 2;
+            double h = (double)(b - a) / n;
+            for (int i = 0; i <= n; i++)
+                A[i, 0] = a + i * h;
+
             if (rb_13.Checked)
             {
-               
+                for (int i = 0; i <= n; i++)
+                {
+                    A[i, 1] = f_13(A[i, 0]);
+                }
             }
             else
             {
-                
-            }              
+                for (int i = 0; i <= n; i++)
+                {
+                    A[i, 1] = f_22(A[i, 0]);
+                }
+            }
+            for (int i = 2; i <= n + 1; i++)//отвечает за столбцы
+            {
+                //проход по элементам в столбце
+                for (int j = 0; j <= n - i + 1; j++)
+                {
+                    A[j, i] = (A[j + 1, i - 1] - A[j, i - 1]) / (A[j + i - 1, 0] - A[j, 0]);
+                }
+            }
+            WriteMas(A);
+            double M6, temp;
+            if (rb_13.Checked)
+            {
+                M6 = f_derivative_13_6(a);
+                for (double i = a+h; i <= b; i += h)
+                {
+                    temp = f_derivative_13_6(i);
+                    if (temp > M6)
+                        M6 = temp;
+                }
+                strList.Add(" M6 =  " + M6);
+            }
+            else
+            {
+                M6 = Math.Abs( f_derivative_22_6(a));
+                for (double i = a + h; i <= b; i += h)
+                {
+                    temp = Math.Abs(f_derivative_22_6(i));
+                    if (temp > M6)
+                        M6 = temp;
+                }
+                strList.Add(" M6 =  " + M6);
+            }
+            //Оценки
+            double[,] A1 = new double[5,5];
+            h = (double)(b - a) / n;
+            for (int i = 0; i < n; i++)
+            {                              
+                A1[i, 0] = a + (i + 0.5) * h;                
+                double w_temp = 1;
+                //P
+                A1[i, 2] = A[0, 1]; 
+                for (int j=1;j<=n;j++)
+                {
+                    w_temp = 1;
+                    for (int p = 0; p < j; p++)
+                    {
+                        w_temp *= (A1[i, 0] - A[p, 0]);
+                    }
+                    A1[i, 2] += A[0, j + 1] * w_temp;
+                }
+                //
+                double w = 1;
+                for (int j = 0; j <= n; j++)
+                {
+                    w *= (A1[i, 0] - A[j, 0]);
+                }
+                w = Math.Abs(w);
+                if (rb_13.Checked)
+                {
+                    A1[i, 1] = f_13(A1[i, 0]);                    
+                }
+                else
+                {
+                    A1[i, 1] = f_22(A1[i, 0]);
+                }
+                A1[i, 4] = (M6 * w) / Factorial(n + 1);
+                A1[i, 3] = Math.Abs(A1[i, 1] - A1[i, 2]);
+            }
+            WriteMas_(A1);
+
         }
 
         
@@ -361,8 +459,8 @@ namespace SLAU
         private void SolveButton_Click(object sender, EventArgs e)
         {
             //Niuton();   
-                     
-            create_table(13);
+
+            Niuton();
             SaveFile();
         }
 
