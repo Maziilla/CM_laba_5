@@ -12,11 +12,12 @@ namespace SLAU
             InitializeComponent();
             SolveButton.Enabled = true;
         }
+        public const int a = 1, b = 2;
         public const int  n=5; //Размерности
-        public double[,] A = new double[n+1 , n + 2]; //Исходная, единичная
-        public double[] b = new double[2];  //Вектор b
-        public double[] solution; //Для решения
+        public double[,] A = new double[n+1 , n + 2]; //Исходная, единичная       
+        public double[] solution,RightPart; //Для решения
         public int[] kol;
+        public double[,] MatrForM = new double[n - 1, n - 1], MateForSpline = new double[n + 1, n + 1];
         const double E = 0.0001; //Точность
         public double chis;
         List<string> strList = new List<string>(); 
@@ -24,7 +25,7 @@ namespace SLAU
         //Вывод вектора
         public void Write(double[] vec)
         {
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < n-1; i++)
             {
                 string str1 = "";
                 str1 = String.Format("{0,-18}", vec[i]);
@@ -36,8 +37,7 @@ namespace SLAU
         //Выводим матрицу
         public void WriteMas(double[,] Mas)
         {
-            if (Mas == A)
-                strList.Add("Матрица А:");
+            strList.Add("");
             for (int i = 0; i <= n; i++)
             {
                 string str1 = "";
@@ -47,14 +47,13 @@ namespace SLAU
             }
             strList.Add("");
         }
-        public void WriteMas_(double[,] Mas)
+        public void WriteMas_(double[,] Mas,int a,int b)
         {
-            if (Mas == A)
-                strList.Add("Матрица А:");
-            for (int i = 0; i < n; i++)
+            strList.Add("");
+            for (int i = 0; i < a; i++)
             {
                 string str1 = "";
-                for (int j = 0; j < n ; j++)
+                for (int j = 0; j < b ; j++)
                     str1 += String.Format("{0,-15} ", Mas[i, j]);
                 strList.Add(str1);
             }
@@ -285,6 +284,14 @@ namespace SLAU
         {
             return (Math.Pow(3, x) * Math.Log(3) + 2);
         }
+        public double f_derivative_13_4(double x)
+        {
+            return (Math.Pow(3, x) * Math.Pow(Math.Log(3), 4));
+        }
+        public double f_derivative_13_5(double x)
+        {
+            return (Math.Pow(3, x) * Math.Pow(Math.Log(3), 5));
+        }
         public double f_derivative_13_6(double x)
         {
             return (Math.Pow(3, x) * Math.Pow(Math.Log(3),6));
@@ -299,71 +306,50 @@ namespace SLAU
         {
             return (1 / (x * x + 1) + 2);
         }
-
+        //d^4/dx^4 arccotx+2x-1 для вольфрама
+        public double f_derivative_22_4(double x)
+        {
+            return (24 * x * (x * x - 1) / Math.Pow((x * x + 1), 4));
+        }
+        public double f_derivative_22_5(double x)
+        {
+            return (-24 * (5 * x * x * x * x - 10 * x * x + 1) / Math.Pow((x * x + 1), 5));
+        }
         public double f_derivative_22_6(double x)
         {
             return (240 * x * (3 * x * x * x * x - 10 * x * x + 3) / Math.Pow((x * x + 1), 6));
-        }
-        public double[] f_13_reverse(double[] x_)
-        {
-            var temp = new double[n];
-            temp[0] = 1 - Math.Sin(x_[1]) / 2;
-            temp[1] = 0.7 - Math.Cos(x_[0] - 1);
-            return temp;
-        }
-
-        public double[] f_22_reverse(double[] x_)
-        {
-            var temp = new double[n];
-            //temp[0] = Math.Acos(0.8 - x_[1]) + 1;
-            //temp[1] = Math.Acos(x_[0] - 2);
-            temp[0] = 2 + Math.Cos(x_[1]);
-            temp[1] = 0.8 - Math.Cos(x_[0] - 1);
-            return temp;
-        }    
+        }           
         public long Factorial(int n)
         {
             long temp = 1;
             for (int i = 1; i <= n; i++)
                 temp *= i;
             return temp;
-        }
-        public void create_table(int type)
+        }        
+        public double[] ProgonkaSLAU(double [,] Matr,double[] Right)
         {
-            int a = 1, b = 2;
-            double h = (double)(b - a) / n;
-            for (int i = 0; i <= n; i++)
-                A[i, 0] = a + i * h;
-                      
-            if (type == 13)
+            double[] res = new double[n-1], a = new double[n - 1], B = new double[n - 1];
+            int N1 = n - 2;
+            double y;
+            y = Matr[0,0];
+            a[0] = -Matr[0,1] / y;
+            B[0] = Right[0] / y;
+            for (int i = 1; i < N1; i++)
             {
-                for (int i = 0; i <= n; i++)
-                {
-                    A[i, 1] = f_13(A[i, 0]);
-                }
+                y = Matr[i,i] + Matr[i,i - 1] * a[i - 1];
+                a[i] = -Matr[i,i + 1] / y;
+                B[i] = (Right[i] - Matr[i,i - 1] * B[i - 1]) / y;
             }
-            else
+            res[N1] = (Right[N1] - Matr[N1,N1 - 1] * B[N1 - 1]) / (Matr[N1,N1] + Matr[N1,N1 - 1] * a[N1 - 1]);
+            for (int i = N1 - 1; i >= 0; i--)
             {
-                for (int i = 0; i <= n; i++)
-                {
-                    A[i, 1] = f_22(A[i, 0]);
-                }
+                res[i] = a[i] * res[i + 1] + B[i];
             }
-            for (int i = 2; i <= n + 1; i++)//отвечает за столбцы
-            { 
-                //проход по элементам в столбце
-                for (int j = 0; j <= n - i + 1; j ++)
-                {
-                    A[j, i] = (A[j + 1, i - 1] - A[j, i - 1]) / (A[j+i - 1, 0] - A[j , 0]);
-                }
-            }            
-            WriteMas(A);
+            return res;
         }
-        
         //Метод Ньютона
         public void Niuton()
-        {
-            int a = 1, b = 2;
+        {            
             double h = (double)(b - a) / n;
             for (int i = 0; i <= n; i++)
                 A[i, 0] = a + i * h;
@@ -450,17 +436,100 @@ namespace SLAU
                 A1[i, 4] = (M6 * w) / Factorial(n + 1);
                 A1[i, 3] = Math.Abs(A1[i, 1] - A1[i, 2]);
             }
-            WriteMas_(A1);
+            WriteMas_(A1,n,n);
 
         }
-
-        
+        //Метод кубических сплайнов 1го дефекта
+        public void CubSplain()
+        {
+            double h = (double)(b - a) / n;
+            double nu = h/(2*h), lambda = nu;            
+            for (int i = 0; i <= n; i++)
+                MateForSpline[i, 0] = a + (i * h);
+            for (int i = 0; i <= n; i++)
+                if (rb_13.Checked)
+                    MateForSpline[i, 1] = f_13(MateForSpline[i, 0]);
+                else
+                    MateForSpline[i, 1] = f_22(MateForSpline[i, 0]);
+            for (int i = 0; i < n - 1; i++)
+            {
+                MatrForM[i, i] = 2;
+                if(i-1>=0) MatrForM[i-1, i] = lambda;
+                if (i + 1 < n - 1) MatrForM[i, i + 1] = nu;
+            }
+            RightPart = new double[n - 1];
+            for (int i = 1; i < n; i++)
+            {
+                RightPart[i - 1] = 3 * lambda * (MateForSpline[i, 1] - MateForSpline[i - 1, 1]) / h + 3 * nu * (MateForSpline[i + 1, 1] - MateForSpline[i, 1]) / h;
+            }         
+            Write(RightPart);
+            if (rb_13.Checked)
+            {
+                RightPart[0] -= 0.5 * f_derivative_13(MateForSpline[0, 0]);
+                RightPart[3] -= 0.5 * f_derivative_13(MateForSpline[n, 0]);
+            }
+            else
+            {
+                RightPart[0] -= 0.5 * f_derivative_22(MateForSpline[0, 0]);
+                RightPart[3] -= 0.5 * f_derivative_22(MateForSpline[n, 0]);
+            }
+            var answer = ProgonkaSLAU(MatrForM, RightPart);
+            for (int i = 1; i < n; i++)
+                MateForSpline[i,2] = answer[i - 1];
+            double M5,M4;
+            double temp;
+            if (rb_13.Checked)
+            {
+                MateForSpline[0, 2] = f_derivative_13(MateForSpline[0, 0]);
+                MateForSpline[n, 2] = f_derivative_13(MateForSpline[n, 0]);
+                M5 = Math.Abs(f_derivative_13_5(a));
+                M4 = Math.Abs(f_derivative_13_4(a));
+                for (double i = a + h; i <= b; i += h)
+                {
+                    temp = Math.Abs(f_derivative_13_5(i));
+                    if (temp > M5)
+                        M5 = temp;
+                    temp = Math.Abs(f_derivative_13_4(i));
+                    if (temp > M4)
+                        M4 = temp;
+                }                
+            }
+            else
+            {
+                MateForSpline[0, 2] = f_derivative_22(MateForSpline[0, 0]);
+                MateForSpline[n, 2] = f_derivative_22(MateForSpline[n, 0]);
+                M5 = Math.Abs(f_derivative_22_5(a));
+                M4 = Math.Abs(f_derivative_22_4(a));
+                for (double i = a + h; i <= b; i += h)
+                {
+                    temp = Math.Abs(f_derivative_22_5(i));
+                    if (temp > M5)
+                        M5 = temp;
+                    temp = Math.Abs(f_derivative_22_4(i));
+                    if (temp > M4)
+                        M4 = temp;
+                }                
+            }
+            for (int i = 0; i <= n; i++)
+                if (rb_13.Checked)
+                    MateForSpline[i, 1] = f_derivative_13(MateForSpline[i, 0]);
+                else
+                    MateForSpline[i, 1] = f_derivative_22(MateForSpline[i, 0]);
+            strList.Add(" M5 =  " + M5);
+            strList.Add(" M4 =  " + M4);
+            temp = M5 / 60 * h * h * h * h;
+            for(int i=0;i<=n;i++)
+            {
+                MateForSpline[i, 3] = Math.Abs(MateForSpline[i, 1] - MateForSpline[i, 2]);
+                MateForSpline[i, 4] = temp;
+            }
+            WriteMas_(MateForSpline, n+1, n);
+        }
         //Решение уравнения
         private void SolveButton_Click(object sender, EventArgs e)
         {
-            //Niuton();   
-
             Niuton();
+            CubSplain();
             SaveFile();
         }
 
