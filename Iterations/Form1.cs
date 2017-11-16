@@ -336,10 +336,11 @@ namespace SLAU
             B[0] = Right[0] / y;
             for (int i = 1; i < N1; i++)
             {
-                y = Matr[i,i] + Matr[i,i - 1] * a[i - 1];
+                y = Matr[i,i] + Matr[i,i -1] * a[i - 1];
                 a[i] = -Matr[i,i + 1] / y;
-                B[i] = (Right[i] - Matr[i,i - 1] * B[i - 1]) / y;
+                B[i] = (Right[i] - Matr[i,i-1] * B[i - 1]) / y;
             }
+            B[N1] = (Right[N1] - Matr[N1, N1 - 1] * B[N1 - 1]) / (Matr[N1, N1] + Matr[N1, N1 - 1] * a[N1 - 1]);
             res[N1] = (Right[N1] - Matr[N1,N1 - 1] * B[N1 - 1]) / (Matr[N1,N1] + Matr[N1,N1 - 1] * a[N1 - 1]);
             for (int i = N1 - 1; i >= 0; i--)
             {
@@ -443,7 +444,7 @@ namespace SLAU
         public void CubSplain()
         {
             double h = (double)(b - a) / n;
-            double nu = h/(2*h), lambda = nu;            
+            double nu = h / (2 * h), lambda = nu;
             for (int i = 0; i <= n; i++)
                 MateForSpline[i, 0] = a + (i * h);
             for (int i = 0; i <= n; i++)
@@ -453,27 +454,28 @@ namespace SLAU
                     MateForSpline[i, 1] = f_22(MateForSpline[i, 0]);
             for (int i = 0; i < n - 1; i++)
             {
-                MatrForM[i, i] = 2;
-                if(i-1>=0) MatrForM[i-1, i] = lambda;
-                if (i + 1 < n - 1) MatrForM[i, i + 1] = nu;
+                MatrForM[i, i] = 4;
+                if (i - 1 >= 0) MatrForM[i, i-1] = 1;
+                if (i + 1 < n - 1) MatrForM[i, i+1] = 1;
             }
             RightPart = new double[n - 1];
             for (int i = 1; i < n; i++)
             {
-                RightPart[i - 1] = 3 * lambda * (MateForSpline[i, 1] - MateForSpline[i - 1, 1]) / h + 3 * nu * (MateForSpline[i + 1, 1] - MateForSpline[i, 1]) / h;
-            }         
-            Write(RightPart);
+                RightPart[i - 1] = 3 * (MateForSpline[i + 1, 1] - MateForSpline[i - 1, 1]) / (/*2 **/ h);
+            }
             if (rb_13.Checked)
             {
-                RightPart[0] -= 0.5 * f_derivative_13(MateForSpline[0, 0]);
-                RightPart[3] -= 0.5 * f_derivative_13(MateForSpline[n, 0]);
+                RightPart[0] -= f_derivative_13(MateForSpline[0, 0]);
+                RightPart[3] -= f_derivative_13(MateForSpline[n, 0]);
             }
             else
             {
-                RightPart[0] -= 0.5 * f_derivative_22(MateForSpline[0, 0]);
-                RightPart[3] -= 0.5 * f_derivative_22(MateForSpline[n, 0]);
+                RightPart[0] -= f_derivative_22(MateForSpline[0, 0]);
+                RightPart[3] -= f_derivative_22(MateForSpline[n, 0]);
             }
+            Write(RightPart);
             var answer = ProgonkaSLAU(MatrForM, RightPart);
+            Write(answer);
             for (int i = 1; i < n; i++)
                 MateForSpline[i,2] = answer[i - 1];
             double M5,M4;
@@ -528,7 +530,7 @@ namespace SLAU
         //Решение уравнения
         private void SolveButton_Click(object sender, EventArgs e)
         {
-            Niuton();
+            //Niuton();
             CubSplain();
             SaveFile();
         }
