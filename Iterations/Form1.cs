@@ -350,7 +350,9 @@ namespace SLAU
         }
         //Метод Ньютона
         public void Niuton()
-        {            
+        {
+            strList.Add("Метод Ньютона");
+
             double h = (double)(b - a) / n;
             for (int i = 0; i <= n; i++)
                 A[i, 0] = a + i * h;
@@ -377,6 +379,7 @@ namespace SLAU
                     A[j, i] = (A[j + 1, i - 1] - A[j, i - 1]) / (A[j + i - 1, 0] - A[j, 0]);
                 }
             }
+            strList.Add("Таблица разностей");
             WriteMas(A);
             double M6, temp;
             if (rb_13.Checked)
@@ -437,12 +440,15 @@ namespace SLAU
                 A1[i, 4] = (M6 * w) / Factorial(n + 1);
                 A1[i, 3] = Math.Abs(A1[i, 1] - A1[i, 2]);
             }
+            strList.Add("       х       |      f(x)      |     Pn(x)     |   Реальная   |       Оценка");
             WriteMas_(A1,n,n);
 
         }
         //Метод кубических сплайнов 1го дефекта
         public void CubSplain()
         {
+            strList.Add("Метод кубических сплайнов 1го дефекта");
+            double[,] splains = new double[n, n];
             double h = (double)(b - a) / n;
             double nu = h / (2 * h), lambda = nu;
             for (int i = 0; i <= n; i++)
@@ -458,6 +464,8 @@ namespace SLAU
                 if (i - 1 >= 0) MatrForM[i, i-1] = 1;
                 if (i + 1 < n - 1) MatrForM[i, i+1] = 1;
             }
+            strList.Add("Трёхдиагональная матрица");
+            WriteMas_(MatrForM, 4, 4);
             RightPart = new double[n - 1];
             for (int i = 1; i < n; i++)
             {
@@ -473,9 +481,10 @@ namespace SLAU
                 RightPart[0] -= f_derivative_22(MateForSpline[0, 0]);
                 RightPart[3] -= f_derivative_22(MateForSpline[n, 0]);
             }
+            strList.Add("Правая часть:");
             Write(RightPart);
             var answer = ProgonkaSLAU(MatrForM, RightPart);
-            Write(answer);
+            //Write(answer);
             for (int i = 1; i < n; i++)
                 MateForSpline[i,2] = answer[i - 1];
             double M5,M4;
@@ -525,12 +534,39 @@ namespace SLAU
                 MateForSpline[i, 3] = Math.Abs(MateForSpline[i, 1] - MateForSpline[i, 2]);
                 MateForSpline[i, 4] = temp;
             }
+            strList.Add("       х       |      f(x)      |      m[i]     |   Реальная   |       Оценка");
             WriteMas_(MateForSpline, n+1, n);
+
+            for (int i = 0; i < n; i++)
+            {
+                splains[i, 0] = (a + 0.1) + h * i;
+                splains[i, 4] = (M4 / 384 + M5 * h / 240) * h * h * h * h;
+            }
+            Func<double, double> z0 = x => (1 + 2 * x) * (1 - x) * (1 - x);
+            Func<double, double> z1 = x => x * (1 - x) * (1 - x);
+            if (rb_13.Checked)
+                for (int i = 0; i < n; i++)
+                {
+                    splains[i, 1] = f_13(splains[i, 0]);
+                    double t = (splains[i, 0] - MateForSpline[i, 0]) / h;
+                    splains[i, 2] = f_13(MateForSpline[i, 0]) * z0(t) + f_13(MateForSpline[i + 1, 0]) * z0(1 - t) + h * (z1(t) * MateForSpline[i, 3] + z1(1 - t) * MateForSpline[i + 1, 3]);
+                    splains[i, 3] = Math.Abs(splains[i, 1] - splains[i, 2]);
+                }
+            else
+                for (int i = 0; i < n; i++)
+                {
+                    splains[i, 1] = f_22(splains[i, 0]);
+                    double t = (splains[i, 0] - MateForSpline[i, 0]) / h;
+                    splains[i, 2] = f_13(MateForSpline[i, 0]) * z0(t) + f_13(MateForSpline[i + 1, 0]) * z0(1 - t) + h * (z1(t) * MateForSpline[i, 3] + z1(1 - t) * MateForSpline[i + 1, 3]);
+                    splains[i, 3] = Math.Abs(splains[i, 1] - splains[i, 2]);
+                }
+            strList.Add("       х       |      f(x)      |    S31(f;x)   |   Реальная   |       Оценка");
+            WriteMas_(splains, n, n);
         }
         //Решение уравнения
         private void SolveButton_Click(object sender, EventArgs e)
         {
-            //Niuton();
+            Niuton();
             CubSplain();
             SaveFile();
         }
