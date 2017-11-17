@@ -527,7 +527,7 @@ namespace SLAU
             answer += A[0, j + 1] * w_temp;
             }              
             strList.Add(" х  = "+ answer);
-            w_temp = c-f(answer);
+            w_temp = Math.Abs(c - f(answer));
             strList.Add(" Невязка равна " + w_temp);            
         }
         //Решение уравнения
