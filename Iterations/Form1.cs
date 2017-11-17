@@ -275,50 +275,38 @@ namespace SLAU
         }
 
         //Для функции
-        public double f_13(double x)
+        public double f(double x)
         {
-            return Math.Pow(3, x) + 2 * x - 5;
-        }
-
-        public double f_derivative_13(double x)
-        {
-            return (Math.Pow(3, x) * Math.Log(3) + 2);
-        }
-        public double f_derivative_13_4(double x)
-        {
-            return (Math.Pow(3, x) * Math.Pow(Math.Log(3), 4));
-        }
-        public double f_derivative_13_5(double x)
-        {
-            return (Math.Pow(3, x) * Math.Pow(Math.Log(3), 5));
-        }
-        public double f_derivative_13_6(double x)
-        {
-            return (Math.Pow(3, x) * Math.Pow(Math.Log(3),6));
-        }
-
-        public double f_22(double x)
-        {            
+            if(rb_13.Checked)
+                return Math.Pow(3, x) + 2 * x - 5;            
             return Math.Atan(x) + 2 * x - 1;
         }
 
-        public double f_derivative_22(double x)
+        public double f_derivative(double x)
         {
+            if (rb_13.Checked)
+                return (Math.Pow(3, x) * Math.Log(3) + 2);            
             return (1 / (x * x + 1) + 2);
         }
         //d^4/dx^4 arccotx+2x-1 для вольфрама
-        public double f_derivative_22_4(double x)
+        public double f_derivative_4(double x)
         {
+            if (rb_13.Checked)
+                return (Math.Pow(3, x) * Math.Pow(Math.Log(3), 4));            
             return (24 * x * (x * x - 1) / Math.Pow((x * x + 1), 4));
         }
-        public double f_derivative_22_5(double x)
+        public double f_derivative_5(double x)
         {
+            if (rb_13.Checked)
+                return (Math.Pow(3, x) * Math.Pow(Math.Log(3), 5));
             return (-24 * (5 * x * x * x * x - 10 * x * x + 1) / Math.Pow((x * x + 1), 5));
         }
-        public double f_derivative_22_6(double x)
+        public double f_derivative_6(double x)
         {
+            if (rb_13.Checked)
+                return (Math.Pow(3, x) * Math.Pow(Math.Log(3),6));
             return (240 * x * (3 * x * x * x * x - 10 * x * x + 3) / Math.Pow((x * x + 1), 6));
-        }           
+        } 
         public long Factorial(int n)
         {
             long temp = 1;
@@ -355,22 +343,10 @@ namespace SLAU
 
             double h = (double)(b - a) / n;
             for (int i = 0; i <= n; i++)
+            {
                 A[i, 0] = a + i * h;
-
-            if (rb_13.Checked)
-            {
-                for (int i = 0; i <= n; i++)
-                {
-                    A[i, 1] = f_13(A[i, 0]);
-                }
-            }
-            else
-            {
-                for (int i = 0; i <= n; i++)
-                {
-                    A[i, 1] = f_22(A[i, 0]);
-                }
-            }
+                A[i, 1] = f(A[i, 0]);
+            }           
             for (int i = 2; i <= n + 1; i++)//отвечает за столбцы
             {
                 //проход по элементам в столбце
@@ -381,29 +357,15 @@ namespace SLAU
             }
             strList.Add("Таблица разностей");
             WriteMas(A);
-            double M6, temp;
-            if (rb_13.Checked)
+            double M6, temp;            
+            M6 = f_derivative_6(a);
+            for (double i = a+h; i <= b; i += h)
             {
-                M6 = f_derivative_13_6(a);
-                for (double i = a+h; i <= b; i += h)
-                {
-                    temp = f_derivative_13_6(i);
-                    if (temp > M6)
-                        M6 = temp;
-                }
-                strList.Add(" M6 =  " + M6);
+                temp = f_derivative_6(i);
+                if (temp > M6)
+                    M6 = temp;
             }
-            else
-            {
-                M6 = Math.Abs( f_derivative_22_6(a));
-                for (double i = a + h; i <= b; i += h)
-                {
-                    temp = Math.Abs(f_derivative_22_6(i));
-                    if (temp > M6)
-                        M6 = temp;
-                }
-                strList.Add(" M6 =  " + M6);
-            }
+            strList.Add(" M6 =  " + M6);            
             //Оценки
             double[,] A1 = new double[5,5];
             h = (double)(b - a) / n;
@@ -428,15 +390,8 @@ namespace SLAU
                 {
                     w *= (A1[i, 0] - A[j, 0]);
                 }
-                w = Math.Abs(w);
-                if (rb_13.Checked)
-                {
-                    A1[i, 1] = f_13(A1[i, 0]);                    
-                }
-                else
-                {
-                    A1[i, 1] = f_22(A1[i, 0]);
-                }
+                w = Math.Abs(w);                
+                A1[i, 1] = f(A1[i, 0]); 
                 A1[i, 4] = (M6 * w) / Factorial(n + 1);
                 A1[i, 3] = Math.Abs(A1[i, 1] - A1[i, 2]);
             }
@@ -453,11 +408,8 @@ namespace SLAU
             double nu = h / (2 * h), lambda = nu;
             for (int i = 0; i <= n; i++)
                 MateForSpline[i, 0] = a + (i * h);
-            for (int i = 0; i <= n; i++)
-                if (rb_13.Checked)
-                    MateForSpline[i, 1] = f_13(MateForSpline[i, 0]);
-                else
-                    MateForSpline[i, 1] = f_22(MateForSpline[i, 0]);
+            for (int i = 0; i <= n; i++)               
+                MateForSpline[i, 1] = f(MateForSpline[i, 0]);                
             for (int i = 0; i < n - 1; i++)
             {
                 MatrForM[i, i] = 4;
@@ -469,18 +421,10 @@ namespace SLAU
             RightPart = new double[n - 1];
             for (int i = 1; i < n; i++)
             {
-                RightPart[i - 1] = 3 * (MateForSpline[i + 1, 1] - MateForSpline[i - 1, 1]) / (/*2 **/ h);
-            }
-            if (rb_13.Checked)
-            {
-                RightPart[0] -= f_derivative_13(MateForSpline[0, 0]);
-                RightPart[3] -= f_derivative_13(MateForSpline[n, 0]);
-            }
-            else
-            {
-                RightPart[0] -= f_derivative_22(MateForSpline[0, 0]);
-                RightPart[3] -= f_derivative_22(MateForSpline[n, 0]);
-            }
+                RightPart[i - 1] = 3 * (MateForSpline[i + 1, 1] - MateForSpline[i - 1, 1]) / h;
+            }            
+            RightPart[0] -= f_derivative(MateForSpline[0, 0]);
+            RightPart[3] -= f_derivative(MateForSpline[n, 0]);            
             strList.Add("Правая часть:");
             Write(RightPart);
             var answer = ProgonkaSLAU(MatrForM, RightPart);
@@ -488,44 +432,22 @@ namespace SLAU
             for (int i = 1; i < n; i++)
                 MateForSpline[i,2] = answer[i - 1];
             double M5,M4;
-            double temp;
-            if (rb_13.Checked)
+            double temp;           
+            MateForSpline[0, 2] = f_derivative(MateForSpline[0, 0]);
+            MateForSpline[n, 2] = f_derivative(MateForSpline[n, 0]);
+            M5 = Math.Abs(f_derivative_5(a));
+            M4 = Math.Abs(f_derivative_4(a));
+            for (double i = a + h; i <= b; i += h)
             {
-                MateForSpline[0, 2] = f_derivative_13(MateForSpline[0, 0]);
-                MateForSpline[n, 2] = f_derivative_13(MateForSpline[n, 0]);
-                M5 = Math.Abs(f_derivative_13_5(a));
-                M4 = Math.Abs(f_derivative_13_4(a));
-                for (double i = a + h; i <= b; i += h)
-                {
-                    temp = Math.Abs(f_derivative_13_5(i));
-                    if (temp > M5)
-                        M5 = temp;
-                    temp = Math.Abs(f_derivative_13_4(i));
-                    if (temp > M4)
-                        M4 = temp;
-                }                
-            }
-            else
-            {
-                MateForSpline[0, 2] = f_derivative_22(MateForSpline[0, 0]);
-                MateForSpline[n, 2] = f_derivative_22(MateForSpline[n, 0]);
-                M5 = Math.Abs(f_derivative_22_5(a));
-                M4 = Math.Abs(f_derivative_22_4(a));
-                for (double i = a + h; i <= b; i += h)
-                {
-                    temp = Math.Abs(f_derivative_22_5(i));
-                    if (temp > M5)
-                        M5 = temp;
-                    temp = Math.Abs(f_derivative_22_4(i));
-                    if (temp > M4)
-                        M4 = temp;
-                }                
+                temp = Math.Abs(f_derivative_5(i));
+                if (temp > M5)
+                    M5 = temp;
+                temp = Math.Abs(f_derivative_4(i));
+                if (temp > M4)
+                    M4 = temp;
             }
             for (int i = 0; i <= n; i++)
-                if (rb_13.Checked)
-                    MateForSpline[i, 1] = f_derivative_13(MateForSpline[i, 0]);
-                else
-                    MateForSpline[i, 1] = f_derivative_22(MateForSpline[i, 0]);
+                    MateForSpline[i, 1] = f_derivative(MateForSpline[i, 0]);
             strList.Add(" M5 =  " + M5);
             strList.Add(" M4 =  " + M4);
             temp = M5 / 60 * h * h * h * h;
@@ -543,31 +465,77 @@ namespace SLAU
                 splains[i, 4] = (M4 / 384 + M5 * h / 240) * h * h * h * h;
             }
             Func<double, double> z0 = x => (1 + 2 * x) * (1 - x) * (1 - x);
-            Func<double, double> z1 = x => x * (1 - x) * (1 - x);
-            if (rb_13.Checked)
-                for (int i = 0; i < n; i++)
-                {
-                    splains[i, 1] = f_13(splains[i, 0]);
-                    double t = (splains[i, 0] - MateForSpline[i, 0]) / h;
-                    splains[i, 2] = f_13(MateForSpline[i, 0]) * z0(t) + f_13(MateForSpline[i + 1, 0]) * z0(1 - t) + h * (z1(t) * MateForSpline[i, 3] + z1(1 - t) * MateForSpline[i + 1, 3]);
-                    splains[i, 3] = Math.Abs(splains[i, 1] - splains[i, 2]);
-                }
-            else
-                for (int i = 0; i < n; i++)
-                {
-                    splains[i, 1] = f_22(splains[i, 0]);
-                    double t = (splains[i, 0] - MateForSpline[i, 0]) / h;
-                    splains[i, 2] = f_13(MateForSpline[i, 0]) * z0(t) + f_13(MateForSpline[i + 1, 0]) * z0(1 - t) + h * (z1(t) * MateForSpline[i, 3] + z1(1 - t) * MateForSpline[i + 1, 3]);
-                    splains[i, 3] = Math.Abs(splains[i, 1] - splains[i, 2]);
-                }
+            Func<double, double> z1 = x => x * (1 - x) * (1 - x);           
+            for (int i = 0; i < n; i++)
+            {
+                splains[i, 1] = f(splains[i, 0]);
+                double t = (splains[i, 0] - MateForSpline[i, 0]) / h;
+                splains[i, 2] = f(MateForSpline[i, 0]) * z0(t) + f(MateForSpline[i + 1, 0]) * z0(1 - t) + h * (z1(t) * MateForSpline[i, 3] + z1(1 - t) * MateForSpline[i + 1, 3]);
+                splains[i, 3] = Math.Abs(splains[i, 1] - splains[i, 2]);
+            }            
             strList.Add("       х       |      f(x)      |    S31(f;x)   |   Реальная   |       Оценка");
             WriteMas_(splains, n, n);
+        }
+        //Метод обратной интерполяции
+        public void obrNiuton()
+
+        {
+            strList.Add("Обратный метод Ньютона");
+
+            double h = (double)(b - a) / n;
+            for (int i = 0; i <= n; i++)
+            { 
+                A[i, 0] = a + i * h;  
+                A[i, 1] = f(A[i, 0]);
+                double temp_revers = A[i, 1];
+                A[i, 1] = A[i, 0];
+                A[i, 0] = temp_revers;
+                
+            }   
+            for (int i = 2; i <= n + 1; i++)//отвечает за столбцы
+            {
+                //проход по элементам в столбце
+                for (int j = 0; j <= n - i + 1; j++)
+                {
+                    A[j, i] = (A[j + 1, i - 1] - A[j, i - 1]) / (A[j + i - 1, 0] - A[j, 0]);
+                }
+            }
+            strList.Add("Таблица разностей");
+            WriteMas(A);
+            double M6, temp;           
+            M6 = f_derivative_6(a);
+            for (double i = a + h; i <= b; i += h)
+            {
+                temp = f_derivative_6(i);
+                if (temp > M6)
+                    M6 = temp;
+            }
+            strList.Add(" M6 =  " + M6);
+            //P
+            double w_temp, answer = A[0, 1], c;
+            if (rb_13.Checked)
+                c = 5.1;
+            else
+                c = 3.1;
+            for (int j = 1; j <= n; j++)
+            {
+                w_temp = 1;
+                for (int p = 0; p < j; p++)
+                {
+                    w_temp *= (c - A[p, 0]);
+                }
+            answer += A[0, j + 1] * w_temp;
+            }              
+            strList.Add(" х  = "+ answer);
+            w_temp = c-f(answer);
+            strList.Add(" Невязка равна " + w_temp);            
         }
         //Решение уравнения
         private void SolveButton_Click(object sender, EventArgs e)
         {
             Niuton();
             CubSplain();
+            obrNiuton();
             SaveFile();
         }
 
