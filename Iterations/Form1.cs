@@ -501,16 +501,7 @@ namespace SLAU
                 }
             }
             strList.Add("Таблица разностей");
-            WriteMas(A);
-            double M6, temp;           
-            M6 = f_derivative_6(a);
-            for (double i = a + h; i <= b; i += h)
-            {
-                temp = f_derivative_6(i);
-                if (temp > M6)
-                    M6 = temp;
-            }
-            strList.Add(" M6 =  " + M6);
+            WriteMas(A);         
             //P
             double w_temp, answer = A[0, 1], c;
             if (rb_13.Checked)
