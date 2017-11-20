@@ -319,6 +319,7 @@ namespace SLAU
         {
             return (240 * x * (3 * x * x * x * x - 10 * x * x + 3) / Math.Pow((x * x + 1), 6));
         }           
+
         public long Factorial(int n)
         {
             long temp = 1;
@@ -347,6 +348,7 @@ namespace SLAU
             }
             return res;
         }
+
         //Метод Ньютона
         public void Niuton()
         {            
@@ -439,6 +441,7 @@ namespace SLAU
             WriteMas_(A1,n,n);
 
         }
+
         //Метод кубических сплайнов 1го дефекта
         public void CubSplain()
         {
@@ -525,6 +528,7 @@ namespace SLAU
             }
             WriteMas_(MateForSpline, n+1, n);
         }
+
         //Решение уравнения
         private void SolveButton_Click(object sender, EventArgs e)
         {
