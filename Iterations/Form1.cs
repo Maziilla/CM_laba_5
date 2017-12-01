@@ -202,7 +202,7 @@ namespace SLAU
         {
             if(rb_13.Checked)
                 return Math.Pow(3, x) + 2 * x - 5;            
-            return Math.Atan(x) + 2 * x - 1;
+            return (Math.PI/2 - Math.Atan(x)) + 2 * x - 1;
         }
 
         public double f_derivative(double x)
