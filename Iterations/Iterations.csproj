@@ -32,6 +32,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Rychusoft.NumericalLibraries.Calculator, Version=1.0.6217.35254, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rychusoft.NumericalLibraries.Calculator.1.0.6217.35254\lib\net40\Rychusoft.NumericalLibraries.Calculator.dll</HintPath>
+    </Reference>
+    <Reference Include="Rychusoft.NumericalLibraries.Derivative, Version=1.0.6217.35254, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rychusoft.NumericalLibraries.Derivative.1.0.6217.35254\lib\net40\Rychusoft.NumericalLibraries.Derivative.dll</HintPath>
+    </Reference>
+    <Reference Include="Rychusoft.NumericalLibraries.Integral, Version=1.0.6217.35254, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rychusoft.NumericalLibraries.Integral.1.0.6217.35254\lib\net40\Rychusoft.NumericalLibraries.Integral.dll</HintPath>
+    </Reference>
+    <Reference Include="Rychusoft.NumericalLibraries.NumericalLibrariesCommon, Version=1.0.6217.35254, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rychusoft.NumericalLibraries.Calculator.1.0.6217.35254\lib\net40\Rychusoft.NumericalLibraries.NumericalLibrariesCommon.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -45,14 +57,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConjugateGradient.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Matrix.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Vector.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -65,6 +80,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

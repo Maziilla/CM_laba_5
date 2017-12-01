@@ -2,6 +2,9 @@
 using System.Windows.Forms;
 using System.IO;
 using System.Collections.Generic;
+using Rychusoft.NumericalLibraries.Integral;
+using MatrixLibrary;
+using System.Text;
 
 namespace SLAU
 {
@@ -20,7 +23,10 @@ namespace SLAU
         public double[,] MatrForM = new double[n - 1, n - 1], MateForSpline = new double[n + 1, n + 1];
         const double E = 0.0001; //Точность
         public double chis;
-        List<string> strList = new List<string>(); 
+        List<string> strList = new List<string>();
+        Dictionary<double, double> pointsDict;
+        Vector coefficient;
+        double[,] matrix;
 
         //Вывод вектора
         public void Write(double[] vec)
@@ -47,6 +53,7 @@ namespace SLAU
             }
             strList.Add("");
         }
+
         public void WriteMas_(double[,] Mas,int a,int b)
         {
             strList.Add("");
@@ -147,6 +154,7 @@ namespace SLAU
                 vec[i] = Math.Round(vec[i], 4);
             return vec;
         }
+
         //Найти минор
         public double[,] GetMinor(double[,] matrix, int row, int column)
         {
@@ -166,87 +174,12 @@ namespace SLAU
             return buf;
         }
 
-        //Разность векторов
-        public double[] Subtraction(double[] vec1, double[] vec2)
-        {
-            double[] C = new double[n];
-            for (int i = 0; i < n; i++)
-                C[i] = vec1[i] - vec2[i];
-            return C;
-        }
-
-        //Скалярное произведение векторов
-        public double MultiScal(double[] A, double[] B)
-        {
-            double sum = A[0] * B[0];
-            for (int i = 1; i < n; i++)
-                sum += A[i] * B[i];
-            return sum;
-        }
-
-        //Для умножения
-        public double Sum(int i, int j, double[,] A, double[,] B)
-        {
-            double sum = 0;
-            for (int k = 0; k < n; k++)
-                sum += A[i, k] * B[k, j];
-            return sum;
-        }
-
-        public double Sum(int i, double[,] A, double[] B)
-        {
-            double sum = 0;
-            for (int k = 0; k < n; k++)
-                sum += A[i, k] * B[k];
-            return sum;
-        }
-
         public double Sum(int i, double[] A, double[,] B)
         {
             double sum = 0;
             for (int k = 0; k < n; k++)
                 sum += A[k] * B[k, i];
             return sum;
-        }
-        //умножение вектора на число
-        public double[] Multiplication(double A, double[] B)
-        {
-            if (B != null)
-            {
-                double[] C = new double[n];
-                for (int i = 0; i < n; i++)                    
-                        C[i] = B[i]*A;
-                return C;
-            }
-            return null;
-        }
-
-        //Умножение матрицы на вектор
-        public double[] Multiplication(double[,] A, double[] B)
-        {
-            if (A != null && B != null)
-            {
-                double[] C = new double[n];
-                for (int i = 0; i < n; i++)
-                    for (int j = 0; j < n; j++)
-                        C[i] = Sum(i, A, B);
-                return C;
-            }
-            return null;
-        }
-
-        //Умножение матриц
-        public double[,] Multiplication(double[,] A, double[,] B)
-        {
-            if (A != null && B != null)
-            {
-                double[,] C = new double[n, n];
-                for (int i = 0; i < n; i++)
-                    for (int j = 0; j < n; j++)
-                        C[i, j] = Sum(i, j, A, B);
-                return C;
-            }
-            return null;
         }
 
         //Нахождение нормы матрицы (max)
@@ -261,16 +194,6 @@ namespace SLAU
                 if (temp > max)
                     max = temp;
             }
-            return max;
-        }
-
-        //Нахождение нормы вектора (max)
-        public double Norma(double[] vec)
-        {
-            double max = 0;
-            for (int i = 0; i < n; i++)
-                if (max < Math.Abs(vec[i]))
-                    max = Math.Abs(vec[i]);
             return max;
         }
 
@@ -336,6 +259,7 @@ namespace SLAU
             }
             return res;
         }
+
         //Метод Ньютона
         public void Niuton()
         {
@@ -399,6 +323,7 @@ namespace SLAU
             WriteMas_(A1,n,n);
 
         }
+
         //Метод кубических сплайнов 1го дефекта
         public void CubSplain()
         {
@@ -476,6 +401,7 @@ namespace SLAU
             strList.Add("       х       |      f(x)      |    S31(f;x)   |   Реальная   |       Оценка");
             WriteMas_(splains, n, n);
         }
+
         //Метод обратной интерполяции
         public void obrNiuton()
 
@@ -521,15 +447,205 @@ namespace SLAU
             w_temp = Math.Abs(c - f(answer));
             strList.Add(" Невязка равна " + w_temp);            
         }
+
+        //Строим таблицу
+        private Dictionary<double,double> GetPoints(double a, double b, int n, double d = 0)
+        {
+            var Dict = new Dictionary<double, double>();
+            var h = (b - a) / n;
+            for (var i = 0; i <= n; i++)
+            {
+                var x = a + (i + d) * h;
+                if (x > b) break;
+                Dict.Add(x, f(x));
+            }
+            strList.Add($"Отрезок аппроксимации [{a}, {b}], h = {h}\r\n");
+            strList.Add($"Таблица: \r\n");
+            foreach (var point in Dict)
+                strList.Add($"{point.Key,5}|{point.Value,10}\r\n");
+            return Dict;
+        }
+
+        //Таблица скалярных произведений-Для скалярного случая
+        public double[,] GetDiscreteMatrix()
+        {
+            var functionList = new List<Func<double, double>>
+            {
+                x => 1,
+                x => x,
+                x => x * x,
+                f
+            }; //Список функций
+            var matrix = new double[functionList.Count, functionList.Count];
+            for (var i = 0; i < functionList.Count; i++)
+                for (var j = 0; j < functionList.Count; j++)
+                    foreach (var point in pointsDict)
+                        matrix[i, j] += functionList[i](point.Key) * functionList[j](point.Key);
+
+            return matrix;
+        }
+
+        //Функция в строке
+        private string functionString()
+        {
+            if (rb_13.Checked)
+                return "3^x+2*x-5";
+            else
+                return "actg(x)+2*x-1";
+        }
+
+        //Таблица скалярных произведений-Для дискретного случая
+        public double[,] GetContinuousMatrix()
+        {
+            var functionList = new List<Func<double, double>>
+            {
+                x => 1,
+                x => x,
+                x => x * x,
+                f
+            }; //Список функций
+            var matrix = new double[functionList.Count, functionList.Count];
+            for (var i = 0; i < functionList.Count; i++)
+                for (var j = i; j < functionList.Count; j++)
+                {
+                    var f = i == 0 ? "1" : i == functionList.Count - 1 ? functionString() : $"x^{i}";
+                    var g = j == 0 ? "1" : j == functionList.Count - 1 ? functionString() : $"x^{j}";
+                    var result = new Integral($"({f})*({g})", a, b).ComputeIntegral();
+                    matrix[i, j] = result;
+                    matrix[j, i] = result;
+                }
+            return matrix;
+        }
+
+        //Коэф
+        private Vector GetCoefficient()
+        {
+            var n = matrix.GetLength(0) - 1;
+            var a = new double[n][];
+            for (var i = 0; i < n; i++)
+                a[i] = new double[n];
+            for (var i = 0; i < n; i++)
+                for (var j = 0; j < n; j++)
+                    a[i][j] = matrix[i, j];
+            var b = new double[n];
+            for (var i = 0; i < n; i++)
+                b[i] = matrix[i, n];
+
+            var sys = new ConjugateGradient(new Matrix(a), new Matrix(b));
+            return sys.Iteration();
+        }
+
+        public double Solve(double x)
+        {
+            var functionList = new List<Func<double, double>>
+            {
+                y => 1,
+                y => y,
+                y => y * y,
+                f
+            }; //Список функций
+            var g = 0.0;
+            for (var i = 0; i < coefficient.Length; i++)
+                g += coefficient[i] * functionList[i](x);
+
+            return g;
+        }
+
+        public double DiscreteValueError()
+        {
+            var functionList = new List<Func<double, double>>
+            {
+                x => 1,
+                x => x,
+                x => x * x,
+                f
+            }; //Список функций
+            var g = 0.0;
+            var ff = 0.0;
+            foreach (var point in pointsDict)
+            {
+                var x = point.Key;
+                g += Solve(x) * Solve(x);
+                ff += f(x) * f(x);
+            }
+            return ff - g;
+        }
+
+        public void DiscreteErrorOut()
+        {
+            strList.Add($"Оценка погрешности: {DiscreteValueError()}\r\n");
+        }
+
+        public void ContinuousErrorOut()
+        {
+            strList.Add($"Оценка погрешности: {ContinuousValueError()}\r\n");
+        }
+
+        public double ContinuousValueError()
+        {
+            var f = new Integral($"({functionString()})*({functionString()})", a, b).ComputeIntegral();
+            var gString = $"{coefficient[0]}";
+            for (var i = 1; i < coefficient.Length; i++)
+                gString += $"{(coefficient[i] >= 0 ? $"+{coefficient[i]}" : $"{coefficient[i]}")} * x^{i}";
+            var g = new Integral($"({gString})*({gString})", a, b).ComputeIntegral();
+            return f - g;
+        }
+
+        public void CoefficientOut()
+        {
+            strList.Add($"Таблица коэффициентов: \r\n");
+            var builder = new StringBuilder();
+            for (var i = 0; i < coefficient.Length; i++)
+                builder.Append($"C{i}|{coefficient[i],11:N8}\r\n");
+            strList.Add(builder.ToString());
+        }
+
+        private void MatrixOut()
+        {
+            var lenght = matrix.GetLength(0);
+            strList.Add($"Таблица скалярных произведений: \r\n");
+            var builder = new StringBuilder();
+            builder.Append("  ");
+            for (var i = 0; i < lenght - 1; i++)
+                builder.Append($"|{$"g{i}",11:N8}");
+            builder.Append($"|{$"f",11:N8}\r\n");
+
+            for (var i = 0; i < lenght; i++)
+            {
+                builder.Append(i == lenght - 1 ? " f" : $"g{i}");
+                for (var j = 0; j < lenght; j++)
+                    builder.Append($"|{matrix[i, j],11:N8}");
+                builder.Append("\r\n");
+            }
+            strList.Add(builder.ToString());
+        }
+
+        //Метод среднеквадратичных приближений
+        public void AverageSquare()
+        {
+            pointsDict= GetPoints(a, b, n);
+            strList.Add("Дискретный случай:\r\n");
+            matrix = GetDiscreteMatrix();
+            coefficient = GetCoefficient();
+            MatrixOut();
+            CoefficientOut();
+            DiscreteErrorOut();
+            strList.Add("Непрерывный случай:\r\n");
+            matrix = GetContinuousMatrix();
+            coefficient = GetCoefficient();
+            MatrixOut();
+            CoefficientOut();
+            ContinuousErrorOut();
+        }
+
         //Решение уравнения
         private void SolveButton_Click(object sender, EventArgs e)
         {
             Niuton();
             CubSplain();
+            AverageSquare();
             obrNiuton();
             SaveFile();
         }
-
-       
     }
 }
