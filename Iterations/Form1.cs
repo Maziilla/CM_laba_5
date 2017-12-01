@@ -319,6 +319,7 @@ namespace SLAU
                 A1[i, 4] = (M6 * w) / Factorial(n + 1);
                 A1[i, 3] = Math.Abs(A1[i, 1] - A1[i, 2]);
             }
+            strList.Add("Оценка погрешности");
             strList.Add("       х       |      f(x)      |     Pn(x)     |   Реальная   |       Оценка");
             WriteMas_(A1,n,n);
 
@@ -381,6 +382,7 @@ namespace SLAU
                 MateForSpline[i, 3] = Math.Abs(MateForSpline[i, 1] - MateForSpline[i, 2]);
                 MateForSpline[i, 4] = temp;
             }
+            strList.Add("Оценки погрешностей в точках интерполяции");
             strList.Add("       х       |      f(x)      |      m[i]     |   Реальная   |       Оценка");
             WriteMas_(MateForSpline, n+1, n);
 
@@ -397,7 +399,8 @@ namespace SLAU
                 double t = (splains[i, 0] - MateForSpline[i, 0]) / h;
                 splains[i, 2] = f(MateForSpline[i, 0]) * z0(t) + f(MateForSpline[i + 1, 0]) * z0(1 - t) + h * (z1(t) * MateForSpline[i, 3] + z1(1 - t) * MateForSpline[i + 1, 3]);
                 splains[i, 3] = Math.Abs(splains[i, 1] - splains[i, 2]);
-            }            
+            }
+            strList.Add("Оценки погрешностей");
             strList.Add("       х       |      f(x)      |    S31(f;x)   |   Реальная   |       Оценка");
             WriteMas_(splains, n, n);
         }
