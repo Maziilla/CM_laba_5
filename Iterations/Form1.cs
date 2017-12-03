@@ -476,7 +476,7 @@ namespace SLAU
             return Dict;
         }
 
-        //Таблица скалярных произведений-Для скалярного случая
+        //Таблица скалярных произведений-Для дискретного случая
         public double[,] GetDiscreteMatrix()
         {
             var functionList = new List<Func<double, double>>
@@ -501,10 +501,10 @@ namespace SLAU
             if (rb_13.Checked)
                 return "3^x+2*x-5";
             else
-                return "actg(x)+2*x-1";
+                return "PI/2 - atg(x)+2*x-1";
         }
 
-        //Таблица скалярных произведений-Для дискретного случая
+        //Таблица скалярных произведений-Для непрерывного случая
         public double[,] GetContinuousMatrix()
         {
             var functionList = new List<Func<double, double>>
