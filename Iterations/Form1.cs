@@ -209,7 +209,7 @@ namespace SLAU
         {
             if (rb_13.Checked)
                 return (Math.Pow(3, x) * Math.Log(3) + 2);            
-            return (1 / (x * x + 1) + 2);
+            return (2 - 1 / (x * x + 1));
         }
         //d^4/dx^4 arccotx+2x-1 для вольфрама
         public double f_derivative_4(double x)
@@ -279,7 +279,7 @@ namespace SLAU
                     A[j, i] = (A[j + 1, i - 1] - A[j, i - 1]) / (A[j + i - 1, 0] - A[j, 0]);
                 }
             }
-            strList.Add("Таблица разностей");
+            strList.Add("Таблица конечных разностей");
             WriteMas(A);
             double M6, temp;            
             M6 = f_derivative_6(a);
@@ -328,7 +328,7 @@ namespace SLAU
         //Метод кубических сплайнов 1го дефекта
         public void CubSplain()
         {
-            strList.Add("Метод кубических сплайнов 1го дефекта");
+            strList.Add("Интерполяционный кубический сплайн первого деффекта кубических сплайнов 1го дефекта");
             double[,] splains = new double[n, n];
             double h = (double)(b - a) / n;
             double nu = h / (2 * h), lambda = nu;
@@ -389,15 +389,15 @@ namespace SLAU
             for (int i = 0; i < n; i++)
             {
                 splains[i, 0] = (a + 0.1) + h * i;
+                splains[i, 1] = f(splains[i, 0]);
                 splains[i, 4] = (M4 / 384 + M5 * h / 240) * h * h * h * h;
             }
             Func<double, double> z0 = x => (1 + 2 * x) * (1 - x) * (1 - x);
             Func<double, double> z1 = x => x * (1 - x) * (1 - x);           
             for (int i = 0; i < n; i++)
-            {
-                splains[i, 1] = f(splains[i, 0]);
+            {                
                 double t = (splains[i, 0] - MateForSpline[i, 0]) / h;
-                splains[i, 2] = f(MateForSpline[i, 0]) * z0(t) + f(MateForSpline[i + 1, 0]) * z0(1 - t) + h * (z1(t) * MateForSpline[i, 3] + z1(1 - t) * MateForSpline[i + 1, 3]);
+                splains[i, 2] = f(MateForSpline[i, 0]) * z0(t) + f(MateForSpline[i + 1, 0]) * z0(1 - t) + h * (z1(t) * MateForSpline[i, 2] - z1(1 - t) * MateForSpline[i + 1, 2]);
                 splains[i, 3] = Math.Abs(splains[i, 1] - splains[i, 2]);
             }
             strList.Add("Оценки погрешностей");
@@ -410,7 +410,8 @@ namespace SLAU
 
         {
             strList.Add("Обратный метод Ньютона");
-
+            strList.Add("Таблица значений f(x)");
+            strList.Add("       yi       |        xi      ");
             double h = (double)(b - a) / n;
             for (int i = 0; i <= n; i++)
             { 
@@ -420,7 +421,10 @@ namespace SLAU
                 A[i, 1] = A[i, 0];
                 A[i, 0] = temp_revers;
                 
-            }   
+            }
+            WriteMas_(A, n, 2);
+            strList.Add("Т.к. f(x) = c => c принадлежит ["+A[0,0]+"; "+A[n-1,0]+"]");
+
             for (int i = 2; i <= n + 1; i++)//отвечает за столбцы
             {
                 //проход по элементам в столбце
@@ -429,14 +433,17 @@ namespace SLAU
                     A[j, i] = (A[j + 1, i - 1] - A[j, i - 1]) / (A[j + i - 1, 0] - A[j, 0]);
                 }
             }
-            strList.Add("Таблица разностей");
-            WriteMas(A);         
+
+                   
             //P
             double w_temp, answer = A[0, 1], c;
             if (rb_13.Checked)
                 c = 5.1;
             else
                 c = 3.1;
+            strList.Add("Выбираем с = "+c);
+            strList.Add("Таблица конечных разностей");
+            WriteMas(A);
             for (int j = 1; j <= n; j++)
             {
                 w_temp = 1;
@@ -576,12 +583,12 @@ namespace SLAU
 
         public void DiscreteErrorOut()
         {
-            strList.Add($"Оценка погрешности: {DiscreteValueError()}\r\n");
+            strList.Add($"Оценка погрешности: {Math.Sqrt(DiscreteValueError())}\r\n");
         }
 
         public void ContinuousErrorOut()
         {
-            strList.Add($"Оценка погрешности: {ContinuousValueError()}\r\n");
+            strList.Add($"Оценка погрешности: {Math.Sqrt(ContinuousValueError())}\r\n");
         }
 
         public double ContinuousValueError()

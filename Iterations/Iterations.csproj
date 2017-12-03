@@ -34,15 +34,19 @@
   <ItemGroup>
     <Reference Include="Rychusoft.NumericalLibraries.Calculator, Version=1.0.6217.35254, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Rychusoft.NumericalLibraries.Calculator.1.0.6217.35254\lib\net40\Rychusoft.NumericalLibraries.Calculator.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Rychusoft.NumericalLibraries.Derivative, Version=1.0.6217.35254, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Rychusoft.NumericalLibraries.Derivative.1.0.6217.35254\lib\net40\Rychusoft.NumericalLibraries.Derivative.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Rychusoft.NumericalLibraries.Integral, Version=1.0.6217.35254, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Rychusoft.NumericalLibraries.Integral.1.0.6217.35254\lib\net40\Rychusoft.NumericalLibraries.Integral.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Rychusoft.NumericalLibraries.NumericalLibrariesCommon, Version=1.0.6217.35254, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Rychusoft.NumericalLibraries.Calculator.1.0.6217.35254\lib\net40\Rychusoft.NumericalLibraries.NumericalLibrariesCommon.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
